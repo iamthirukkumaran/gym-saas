@@ -172,12 +172,24 @@ curl -X POST https://your-host/api/cron/run \
 | `npm run db:reset` | drop, push schema, reseed demo data |
 | `npm run db:push` / `db:seed` / `db:studio` | individual Prisma steps |
 | `npm run engine` | one engine pass from the CLI |
+| `npm run use:postgres` / `use:sqlite` | switch the Prisma provider for deployment |
 
 ---
 
 ## Deploying
 
-SQLite will not survive on serverless hosting — see **[DEPLOYMENT.md](./DEPLOYMENT.md)** for the Postgres switch (one env var, one schema line) and a full Vercel walkthrough.
+SQLite will not survive on serverless hosting, because each request gets an
+ephemeral filesystem. Switching to Postgres is two commands:
+
+```bash
+npm run use:postgres
+DATABASE_URL="postgresql://…" npx prisma db push
+```
+
+`lib/db.ts` picks the driver adapter from `DATABASE_URL` at runtime, so no
+application code changes. `vercel.json` already registers the engine cron.
+See **[DEPLOYMENT.md](./DEPLOYMENT.md)** for the full walkthrough, including
+going live on the WhatsApp Business API.
 
 ---
 

@@ -2,7 +2,7 @@
   "name": "astryx",
   "version": "1.0.0",
   "private": true,
-  "description": "Astryx — WhatsApp-first gym management SaaS",
+  "description": "Astryx \u2014 WhatsApp-first gym management SaaS",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "prisma generate && next build",
@@ -12,7 +12,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "rm -f prisma/astryx.db && prisma db push && npm run db:seed",
     "db:studio": "prisma studio",
-    "engine": "tsx scripts/run-engine.ts"
+    "engine": "tsx scripts/run-engine.ts",
+    "use:postgres": "tsx scripts/switch-db.ts postgres",
+    "use:sqlite": "tsx scripts/switch-db.ts sqlite"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.1",

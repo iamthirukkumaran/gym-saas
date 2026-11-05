@@ -18,18 +18,21 @@ postgresql://user:password@host/dbname?sslmode=require
 
 > **Supabase:** use the **connection pooler** string (port `6543`) for the app, and the direct string (port `5432`) for running migrations.
 
-## 2. Change the Prisma provider
+## 2. Switch the Prisma provider
 
-In `prisma/schema.prisma`:
-
-```diff
- datasource db {
--  provider = "sqlite"
-+  provider = "postgresql"
- }
+```bash
+npm run use:postgres
 ```
 
-The schema deliberately avoids every Postgres-incompatible feature, so nothing else changes.
+That flips one line in `prisma/schema.prisma` (`provider = "sqlite"` →
+`"postgresql"`). It is a script only because Prisma requires the provider to
+be a literal and cannot read it from an environment variable.
+
+Nothing else changes: the schema deliberately avoids every
+Postgres-incompatible feature, and `lib/db.ts` picks the driver adapter from
+the shape of `DATABASE_URL` at runtime.
+
+`npm run use:sqlite` switches back for local work.
 
 ## 3. Push the schema
 
