@@ -170,6 +170,7 @@ curl -X POST https://your-host/api/cron/run \
 | `npm run dev` | dev server |
 | `npm run build` / `start` | production |
 | `npm run db:reset` | drop, push schema, reseed demo data |
+| `npm run db:seed:platform` | production-safe seed: admins, plans, templates only — no demo gyms, idempotent |
 | `npm run db:push` / `db:seed` / `db:studio` | individual Prisma steps |
 | `npm run engine` | one engine pass from the CLI |
 | `npm run use:postgres` / `use:sqlite` | switch the Prisma provider for deployment |

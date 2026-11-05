@@ -14,7 +14,8 @@
     "db:studio": "prisma studio",
     "engine": "tsx scripts/run-engine.ts",
     "use:postgres": "tsx scripts/switch-db.ts postgres",
-    "use:sqlite": "tsx scripts/switch-db.ts sqlite"
+    "use:sqlite": "tsx scripts/switch-db.ts sqlite",
+    "db:seed:platform": "tsx prisma/seed.ts --platform-only"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.1",

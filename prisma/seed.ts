@@ -13,7 +13,24 @@ import { hash } from "bcryptjs";
 
 import { DEFAULT_MEMBERSHIP_PLANS, DEFAULT_SAAS_PLANS, DEFAULT_TEMPLATES } from "../lib/defaults";
 
-process.loadEnvFile(".env");
+try {
+  process.loadEnvFile(".env");
+} catch {
+  // In production the environment is supplied by the host, not a .env file.
+}
+
+/**
+ * Seed mode.
+ *
+ *   npm run db:seed                 → everything, including 4 demo gyms (local)
+ *   SEED_MODE=platform npm run db:seed → platform only, no demo tenants
+ *
+ * Use `platform` for a real deployment: it creates the Astryx admin logins,
+ * the subscription plans and the WhatsApp template library, and stops there.
+ * Real gyms are then provisioned from the admin console.
+ */
+const PLATFORM_ONLY =
+  process.env.SEED_MODE === "platform" || process.argv.includes("--platform-only");
 
 const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL! });
 const db = new PrismaClient({ adapter });
@@ -66,7 +83,89 @@ function phoneFor(i: number): string {
   return `+9178${String(10_00000 + i * 37).slice(0, 8)}`.slice(0, 13);
 }
 
+/**
+ * Creates the platform admin logins, subscription plans and template library.
+ * Idempotent: safe to re-run against a live database.
+ */
+async function seedPlatform() {
+  const admins = [
+    { name: "Astryx Admin", email: "admin@astryx.app", role: "SUPERADMIN" },
+    { name: "Astryx Support", email: "support@astryx.app", role: "SUPPORT" },
+  ];
+  const tempPassword = process.env.ADMIN_PASSWORD ?? "astryx123";
+  const passwordHash = await hash(tempPassword, 12);
+
+  for (const a of admins) {
+    const existing = await db.platformUser.findUnique({ where: { email: a.email } });
+    if (existing) {
+      console.log(`   = platform user ${a.email} already exists, left unchanged`);
+      continue;
+    }
+    await db.platformUser.create({ data: { ...a, passwordHash } });
+    console.log(`   + platform user ${a.email}`);
+  }
+
+  for (const p of DEFAULT_SAAS_PLANS) {
+    await db.saasPlan.upsert({
+      where: { key: p.key },
+      update: {},
+      create: {
+        key: p.key,
+        name: p.name,
+        tagline: p.tagline,
+        priceMonthly: p.priceMonthly,
+        priceYearly: p.priceYearly,
+        memberLimit: p.memberLimit,
+        staffLimit: p.staffLimit,
+        waMessageLimit: p.waMessageLimit,
+        featuresJson: JSON.stringify(p.features),
+        sortOrder: p.sortOrder,
+        isDefault: p.isDefault,
+      },
+    });
+  }
+  console.log(`   + ${DEFAULT_SAAS_PLANS.length} subscription plans ensured`);
+
+  for (const t of DEFAULT_TEMPLATES) {
+    await db.systemTemplate.upsert({
+      where: { key: t.key },
+      update: {},
+      create: {
+        key: t.key,
+        name: t.name,
+        category: t.category,
+        body: t.body,
+        description: t.description,
+        defaultRule: t.defaultRule,
+        defaultOffset: t.defaultOffset ?? 0,
+        trigger: t.trigger ?? null,
+        sortOrder: t.sortOrder,
+      },
+    });
+  }
+  console.log(`   + ${DEFAULT_TEMPLATES.length} library templates ensured`);
+
+  console.log(`
+✅ Platform ready.
+
+   Sign in at /admin/login
+     admin@astryx.app   / ${tempPassword}
+     support@astryx.app / ${tempPassword}
+
+   ⚠ Change both passwords immediately, then provision your first gym
+     from Admin → Gyms → Provision a gym.
+`);
+}
+
 async function main() {
+  if (PLATFORM_ONLY) {
+    // Never wipe a production database. Only the platform catalogue is
+    // touched, and only where it is missing.
+    console.log("→ Platform-only seed: existing tenant data will NOT be touched.");
+    await seedPlatform();
+    return;
+  }
+
   console.log("→ Clearing existing data…");
   // Order matters: children before parents.
   await db.messageLog.deleteMany();

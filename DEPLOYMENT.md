@@ -46,17 +46,31 @@ For a long-lived deployment prefer real migrations:
 DATABASE_URL="postgresql://…" npx prisma migrate dev --name init
 ```
 
-## 4. Seed the catalogue
-
-The seed script creates the platform admin, subscription plans, the template library **and** four demo gyms.
+## 4. Seed the platform catalogue
 
 ```bash
-DATABASE_URL="postgresql://…" npm run db:seed
+DATABASE_URL="postgresql://…" npm run db:seed:platform
 ```
 
-For a real production database you almost certainly want only the first three. Open `prisma/seed.ts` and stop after the "Creating the global template library" step, or delete the demo gyms afterwards from **Admin → Gyms**.
+This creates **only** what a real deployment needs: the two Astryx admin
+logins, the three subscription plans and the twelve WhatsApp templates. It is
+idempotent and never deletes anything, so it is safe to re-run after an
+upgrade.
 
-**Change both demo passwords immediately** — they are in the README.
+Set `ADMIN_PASSWORD` to choose the initial admin password:
+
+```bash
+ADMIN_PASSWORD="$(openssl rand -base64 18)" DATABASE_URL="postgresql://…" npm run db:seed:platform
+```
+
+Otherwise it defaults to `astryx123` — **change it immediately** at
+`/admin/login`.
+
+> `npm run db:seed` (without `:platform`) is the local demo seed. It **wipes
+> every table** and creates four fictional gyms. Never run it against a
+> production database.
+
+Real gyms are then created from **Admin → Gyms → Provision a gym**.
 
 ---
 
