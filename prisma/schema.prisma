@@ -1,0 +1,586 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Astryx — WhatsApp-first gym management SaaS
+//
+// Multi-tenant: every gym-scoped row carries `gymId`. Platform-level rows
+// (PlatformUser, SaasPlan, SystemTemplate, EngineRun) have no gymId.
+//
+// Conventions
+//  - Money is stored as INTEGER PAISE (₹1 = 100). Never floats.
+//  - "Enums" are TEXT columns because SQLite has no native enum; the allowed
+//    values live in lib/constants.ts and are validated with Zod at the edge.
+//  - JSON-ish payloads are stored as TEXT columns suffixed `Json`.
+//  - Schema avoids every Postgres-incompatible feature, so the only change
+//    needed to move to Supabase/Neon is the datasource provider + a migration.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ── Platform layer (Astryx's own staff & catalogue) ─────────────────────────
+
+model PlatformUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("SUPERADMIN") // SUPERADMIN | SUPPORT
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+/// A subscription plan Astryx sells to gym owners.
+model SaasPlan {
+  id             String   @id @default(cuid())
+  key            String   @unique // starter | growth | pro
+  name           String
+  tagline        String?
+  priceMonthly   Int // paise
+  priceYearly    Int // paise
+  memberLimit    Int // -1 = unlimited
+  staffLimit     Int
+  waMessageLimit Int // per billing month, -1 = unlimited
+  featuresJson   String   @default("[]")
+  sortOrder      Int      @default(0)
+  active         Boolean  @default(true)
+  isDefault      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  gyms          Gym[]
+  subscriptions Subscription[]
+}
+
+/// Astryx-curated WhatsApp copy. Cloned into each gym on provisioning.
+model SystemTemplate {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  name          String
+  category      String // UTILITY | MARKETING | SERVICE
+  language      String   @default("en")
+  body          String
+  description   String?
+  /// If set, provisioning also creates a ReminderRule from this template.
+  defaultRule   Boolean  @default(false)
+  defaultOffset Int      @default(0)
+  trigger       String? // see constants.TRIGGERS
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ── Tenant ──────────────────────────────────────────────────────────────────
+
+model Gym {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String
+  ownerName   String
+  email       String  @unique
+  phone       String
+  addressLine String?
+  city        String?
+  state       String?
+  pincode     String?
+  country     String  @default("IN")
+  currency    String  @default("INR")
+  timezone    String  @default("Asia/Kolkata")
+  logoUrl     String?
+  gstin       String?
+  /// VPA used to build UPI payment links on the public renewal page.
+  upiId       String?
+
+  status      String    @default("TRIAL") // TRIAL | ACTIVE | PAST_DUE | SUSPENDED | CANCELLED
+  trialEndsAt DateTime?
+
+  // WhatsApp connection (per-tenant credentials; sandbox needs none)
+  waProvider      String  @default("sandbox") // sandbox | meta | aisensy | wati | interakt
+  waSenderDisplay String?
+  waPhoneNumberId String?
+  waBusinessId    String?
+  waAccessToken   String?
+  waApiKey        String?
+  waConnected     Boolean @default(false)
+
+  // Automation defaults
+  autoRemindersEnabled Boolean @default(true)
+  reminderSendHour     Int     @default(10) // 0-23, gym-local
+  quietHoursStart      Int     @default(21)
+  quietHoursEnd        Int     @default(8)
+
+  // Counters for human-readable codes (avoids COUNT races)
+  memberSeq  Int @default(0)
+  invoiceSeq Int @default(0)
+
+  saasPlanId String?
+  saasPlan   SaasPlan? @relation(fields: [saasPlanId], references: [id])
+
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff         StaffUser[]
+  trainers      Trainer[]
+  plans         MembershipPlan[]
+  members       Member[]
+  memberships   Membership[]
+  payments      Payment[]
+  checkIns      CheckIn[]
+  leads         Lead[]
+  templates     WaTemplate[]
+  rules         ReminderRule[]
+  messages      MessageLog[]
+  broadcasts    Broadcast[]
+  subscriptions Subscription[]
+  invoices      SaasInvoice[]
+  auditLogs     AuditLog[]
+
+  @@index([status])
+}
+
+model Subscription {
+  id                String    @id @default(cuid())
+  gymId             String
+  gym               Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  planId            String
+  plan              SaasPlan  @relation(fields: [planId], references: [id])
+  status            String    @default("TRIALING") // TRIALING | ACTIVE | PAST_DUE | CANCELLED
+  billingCycle      String    @default("MONTHLY") // MONTHLY | YEARLY
+  amount            Int // paise, snapshot of price at signup
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean  @default(false)
+  cancelledAt        DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  invoices SaasInvoice[]
+
+  @@index([gymId])
+  @@index([status])
+}
+
+/// Invoice Astryx raises against a gym (platform revenue).
+model SaasInvoice {
+  id             String        @id @default(cuid())
+  gymId          String
+  gym            Gym           @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
+  number         String        @unique
+  amount         Int
+  tax            Int           @default(0)
+  total          Int
+  status         String        @default("DUE") // DUE | PAID | OVERDUE | VOID
+  issuedAt       DateTime      @default(now())
+  dueAt          DateTime
+  paidAt         DateTime?
+  method         String?
+  reference      String?
+  createdAt      DateTime      @default(now())
+
+  @@index([gymId])
+  @@index([status])
+}
+
+// ── Gym staff & trainers ────────────────────────────────────────────────────
+
+model StaffUser {
+  id           String    @id @default(cuid())
+  gymId        String
+  gym          Gym       @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  passwordHash String
+  phone        String?
+  role         String    @default("OWNER") // OWNER | MANAGER | FRONTDESK
+  active       Boolean   @default(true)
+  mustChangePassword Boolean @default(false)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([gymId, email])
+  @@index([gymId])
+}
+
+model Trainer {
+  id        String   @id @default(cuid())
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  email     String?
+  specialty String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members Member[]
+  leads   Lead[]
+
+  @@index([gymId])
+}
+
+// ── Membership catalogue ────────────────────────────────────────────────────
+
+model MembershipPlan {
+  id           String   @id @default(cuid())
+  gymId        String
+  gym          Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  name         String
+  durationDays Int
+  price        Int // paise
+  joiningFee   Int      @default(0)
+  description  String?
+  color        String?
+  active       Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships Membership[]
+
+  @@unique([gymId, name])
+  @@index([gymId, active])
+}
+
+// ── Members ─────────────────────────────────────────────────────────────────
+
+model Member {
+  id    String @id @default(cuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  code     String // MBR-0001, unique per gym
+  name     String
+  phone    String
+  altPhone String?
+  email    String?
+  gender   String? // MALE | FEMALE | OTHER
+  dob      DateTime?
+
+  addressLine String?
+  city        String?
+  photoUrl    String?
+
+  joinDate DateTime
+  status   String   @default("ACTIVE") // ACTIVE | EXPIRED | FROZEN | CANCELLED
+
+  heightCm     Int?
+  weightKg     Float?
+  goal         String?
+  medicalNotes String?
+
+  emergencyName  String?
+  emergencyPhone String?
+
+  trainerId String?
+  trainer   Trainer? @relation(fields: [trainerId], references: [id])
+  source    String? // WALKIN | REFERRAL | INSTAGRAM | GOOGLE | OTHER
+
+  /// Member-level WhatsApp suppression. Honoured by the engine, always.
+  waOptOut Boolean @default(false)
+  notes    String?
+
+  // Denormalised read-model so dashboards never fan out per member.
+  expiryDate    DateTime?
+  activePlanName String?
+  totalPaid     Int       @default(0)
+  balanceDue    Int       @default(0)
+  lastCheckInAt DateTime?
+  lastMessageAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+  payments    Payment[]
+  checkIns    CheckIn[]
+  messages    MessageLog[]
+  leads       Lead[]
+
+  @@unique([gymId, code])
+  @@index([gymId, status])
+  @@index([gymId, expiryDate])
+  @@index([gymId, phone])
+  @@index([gymId, name])
+}
+
+model Membership {
+  id       String @id @default(cuid())
+  gymId    String
+  gym      Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  planId   String?
+  plan     MembershipPlan? @relation(fields: [planId], references: [id])
+  planName String // snapshot — survives plan renames/deletes
+
+  startDate    DateTime
+  endDate      DateTime
+  durationDays Int
+
+  price    Int // paise, before discount
+  discount Int @default(0)
+  payable  Int // price - discount + joiningFee
+
+  status    String  @default("ACTIVE") // UPCOMING | ACTIVE | EXPIRED | CANCELLED | FROZEN
+  autoRenew Boolean @default(false)
+
+  /// Days the membership was paused; endDate is pushed out by this much.
+  freezeDays Int      @default(0)
+  frozenAt   DateTime?
+  isRenewal  Boolean  @default(false)
+
+  createdByStaffId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  payments Payment[]
+
+  @@index([gymId, endDate])
+  @@index([gymId, status])
+  @@index([memberId])
+}
+
+model Payment {
+  id           String      @id @default(cuid())
+  gymId        String
+  gym          Gym         @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  memberId     String
+  member       Member      @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  membershipId String?
+  membership   Membership? @relation(fields: [membershipId], references: [id])
+
+  amount    Int // paise
+  mode      String   @default("CASH") // CASH | UPI | CARD | BANK | OTHER
+  paidAt    DateTime
+  invoiceNo String
+  reference String?
+  notes     String?
+
+  collectedByStaffId String?
+  createdAt          DateTime @default(now())
+
+  @@unique([gymId, invoiceNo])
+  @@index([gymId, paidAt])
+  @@index([memberId])
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  checkInAt DateTime @default(now())
+  method    String   @default("MANUAL") // MANUAL | CODE | PHONE
+  staffId   String?
+
+  @@index([gymId, checkInAt])
+  @@index([memberId, checkInAt])
+}
+
+// ── Sales pipeline ──────────────────────────────────────────────────────────
+
+model Lead {
+  id    String @id @default(cuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  name     String
+  phone    String
+  email    String?
+  source   String? // WALKIN | REFERRAL | INSTAGRAM | GOOGLE | PHONE | OTHER
+  interest String?
+  status   String  @default("NEW") // NEW | CONTACTED | TRIAL | WON | LOST
+
+  assignedStaffId String?
+  trainerId       String?
+  trainer         Trainer? @relation(fields: [trainerId], references: [id])
+
+  followUpAt DateTime?
+  notes      String?
+  lostReason String?
+
+  convertedMemberId String?
+  convertedMember   Member?  @relation(fields: [convertedMemberId], references: [id])
+  convertedAt       DateTime?
+
+  messages  MessageLog[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([gymId, status])
+  @@index([gymId, followUpAt])
+}
+
+// ── WhatsApp engine ─────────────────────────────────────────────────────────
+
+model WaTemplate {
+  id    String @id @default(cuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  key      String
+  name     String
+  category String  @default("UTILITY") // UTILITY | MARKETING | SERVICE
+  language String  @default("en")
+  body     String
+  active   Boolean @default(true)
+  /// System templates are editable but cannot be deleted.
+  isSystem Boolean @default(false)
+
+  // Meta Cloud API registration state, when provider = meta
+  metaTemplateName String?
+  metaStatus       String? // PENDING | APPROVED | REJECTED
+  buttonsJson      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rules ReminderRule[]
+
+  @@unique([gymId, key])
+  @@index([gymId, active])
+}
+
+/// One automation: "7 days before expiry, send the renewal nudge."
+model ReminderRule {
+  id    String @id @default(cuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  name        String
+  trigger     String // BEFORE_EXPIRY | ON_EXPIRY | AFTER_EXPIRY | WELCOME | BIRTHDAY | DUES_PENDING | INACTIVITY | WIN_BACK
+  /// Days relative to the trigger date. Always stored as a positive magnitude.
+  offsetDays  Int     @default(0)
+  templateKey String
+  template    WaTemplate? @relation(fields: [gymId, templateKey], references: [gymId, key])
+  enabled     Boolean @default(true)
+  sendHour    Int? // overrides Gym.reminderSendHour
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  messages MessageLog[]
+
+  @@unique([gymId, trigger, offsetDays])
+  @@index([gymId, enabled])
+}
+
+/// Every message Astryx has sent or will send. The audit trail + the queue.
+model MessageLog {
+  id    String @id @default(cuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  memberId String?
+  member   Member? @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  leadId   String?
+  lead     Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  toPhone     String
+  templateKey String?
+  ruleId      String?
+  rule        ReminderRule? @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  broadcastId String?
+  broadcast   Broadcast?    @relation(fields: [broadcastId], references: [id], onDelete: SetNull)
+
+  /// Fully rendered text — what the member actually received.
+  body    String
+  channel String @default("whatsapp")
+  kind    String @default("AUTOMATED") // AUTOMATED | MANUAL | BROADCAST
+
+  status            String    @default("QUEUED") // QUEUED | SENT | DELIVERED | READ | FAILED | SKIPPED
+  provider          String    @default("sandbox")
+  providerMessageId String?
+  skipReason        String?
+
+  scheduledFor DateTime
+  sentAt       DateTime?
+  error        String?
+  attempts     Int       @default(0)
+  costPaise    Int       @default(0)
+
+  /// Makes the engine idempotent: one message per (member, rule, cycle).
+  dedupeKey String? @unique
+
+  createdAt DateTime @default(now())
+
+  @@index([gymId, status])
+  @@index([gymId, createdAt])
+  @@index([gymId, scheduledFor])
+  @@index([memberId])
+}
+
+model Broadcast {
+  id    String @id @default(cuid())
+  gymId String
+  gym   Gym    @relation(fields: [gymId], references: [id], onDelete: Cascade)
+
+  name        String
+  templateKey String?
+  body        String
+  segmentJson String   @default("{}")
+  status      String   @default("DRAFT") // DRAFT | SENDING | SENT | FAILED
+  totalCount  Int      @default(0)
+  sentCount   Int      @default(0)
+  failedCount Int      @default(0)
+
+  scheduledFor     DateTime?
+  startedAt        DateTime?
+  finishedAt       DateTime?
+  createdByStaffId String?
+  createdAt        DateTime  @default(now())
+
+  messages MessageLog[]
+
+  @@index([gymId, status])
+}
+
+// ── Observability ───────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  gymId     String?
+  gym       Gym?     @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  actorType String // PLATFORM | STAFF | SYSTEM
+  actorId   String?
+  actorName String?
+  action    String
+  entity    String?
+  entityId  String?
+  metaJson  String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([gymId, createdAt])
+  @@index([createdAt])
+}
+
+/// One execution of the reminder engine. Lets support answer
+/// "did tonight's reminders actually go out?" without guessing.
+model EngineRun {
+  id            String    @id @default(cuid())
+  trigger       String    @default("CRON") // CRON | MANUAL
+  startedAt     DateTime  @default(now())
+  finishedAt    DateTime?
+  gymsProcessed Int       @default(0)
+  queued        Int       @default(0)
+  sent          Int       @default(0)
+  failed        Int       @default(0)
+  skipped       Int       @default(0)
+  statusSynced  Int       @default(0)
+  errorText     String?
+
+  @@index([startedAt])
+}
