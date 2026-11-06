@@ -359,3 +359,21 @@ export const IconHistory = (p: IconProps) =>
     </>,
     p,
   );
+
+export const IconPin = (p: IconProps) =>
+  svg(
+    <>
+      <path d="M9 4h6l-.6 5.2a3 3 0 0 0 1.1 2.7l1.7 1.4a1 1 0 0 1-.6 1.7H7.4a1 1 0 0 1-.6-1.7l1.7-1.4a3 3 0 0 0 1.1-2.7L9 4Z" />
+      <path d="M12 15v5" />
+    </>,
+    p,
+  );
+
+export const IconPanelLeft = (p: IconProps) =>
+  svg(
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M9.5 4v16" />
+    </>,
+    p,
+  );
