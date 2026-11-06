@@ -45,11 +45,11 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
         <div
           role="group"
           aria-label="Billing period"
-          className="relative inline-flex items-center border border-white/15 bg-white/[0.03] p-1"
+          className="relative inline-flex items-center rounded-xl border border-white/12 bg-white/[0.03] p-1"
         >
           {/* Sliding pill */}
           <span
-            className="absolute inset-y-1 w-[calc(50%-0.25rem)] bg-volt-300 transition-transform duration-300 ease-out"
+            className="absolute inset-y-1 w-[calc(50%-0.25rem)] rounded-lg bg-butter-300 transition-transform duration-300 ease-out"
             style={{ transform: yearly ? "translateX(100%)" : "translateX(0)" }}
             aria-hidden
           />
@@ -62,7 +62,7 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
                 onClick={() => setYearly(i === 1)}
                 aria-pressed={active}
                 className={cn(
-                  "label relative z-10 w-32 px-4 py-3 transition-colors",
+                  "relative z-10 w-32 rounded-lg px-4 py-2.5 text-[14px] font-medium transition-colors",
                   active ? "text-void" : "text-white/50 hover:text-white/85",
                 )}
               >
@@ -74,7 +74,7 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
       </div>
 
       {monthsFree > 0 ? (
-        <p className="label mt-4 text-center text-volt-300">
+        <p className="mt-4 text-center text-[13.5px] text-butter-300">
           Yearly billing is {monthsFree} {monthsFree === 1 ? "month" : "months"} free
         </p>
       ) : null}
@@ -88,14 +88,14 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
             <div
               key={p.key}
               className={cn(
-                "lift relative p-8",
+                "lift relative rounded-2xl p-8",
                 featured
-                  ? "bg-volt-300 text-void shadow-[0_24px_60px_-12px_rgb(212_255_63_/_0.25)]"
+                  ? "bg-butter-300 text-void shadow-[0_24px_60px_-12px_rgb(212_255_63_/_0.25)]"
                   : "border border-white/12 bg-white/[0.02] hover:border-white/25",
               )}
             >
               {featured ? (
-                <span className="label absolute -top-3.5 left-8 bg-void px-3 py-2 text-volt-300">
+                <span className="absolute -top-3.5 left-8 rounded-lg bg-void px-3 py-2 text-[12.5px] font-medium text-butter-300">
                   Most popular
                 </span>
               ) : null}
@@ -115,7 +115,7 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
                 <span
                   key={`${p.key}-${yearly}`}
                   className={cn(
-                    "display bubble-in text-5xl",
+                    "display bubble-in text-[2.75rem]",
                     featured ? "text-void" : "text-white",
                   )}
                 >
@@ -135,10 +135,10 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
               <Link
                 href="/login"
                 className={cn(
-                  "label mt-7 flex h-14 items-center justify-center transition-all",
+                  "mt-7 flex h-13 items-center justify-center rounded-lg py-4 text-[15px] font-medium transition-all",
                   featured
-                    ? "bg-void text-volt-300 hover:bg-void-soft"
-                    : "border border-white/20 text-white hover:border-volt-300 hover:bg-volt-300 hover:text-void",
+                    ? "bg-void text-butter-300 hover:bg-void-soft"
+                    : "border border-white/20 text-white hover:border-butter-300 hover:bg-butter-300 hover:text-void",
                 )}
               >
                 Start 14-day trial
@@ -161,7 +161,7 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
                     <IconCheck
                       className={cn(
                         "mt-0.5 size-3.5 shrink-0",
-                        featured ? "text-void" : "text-volt-300",
+                        featured ? "text-void" : "text-butter-300",
                       )}
                       strokeWidth={3}
                     />

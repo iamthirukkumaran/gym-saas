@@ -188,7 +188,7 @@ export function ScrollProgress() {
   return (
     <div className="fixed inset-x-0 top-0 z-[60] h-0.5 bg-transparent">
       <div
-        className="scroll-progress h-full bg-volt-300"
+        className="scroll-progress h-full bg-butter-300"
         style={{ transform: `scaleX(${pct})` }}
       />
     </div>

@@ -120,7 +120,7 @@ export function Faq() {
               <span
                 className={cn(
                   "text-[17px] font-medium transition-colors sm:text-[19px]",
-                  isOpen ? "text-volt-300" : "text-white/85 group-hover:text-white",
+                  isOpen ? "text-butter-300" : "text-white/85 group-hover:text-white",
                 )}
               >
                 {item.q}
@@ -129,7 +129,7 @@ export function Faq() {
                 className={cn(
                   "grid size-9 shrink-0 place-items-center border transition-all duration-300",
                   isOpen
-                    ? "border-volt-300 bg-volt-300 text-void"
+                    ? "border-butter-300 bg-butter-300 text-void"
                     : "border-white/20 text-white/50 group-hover:border-white/50",
                 )}
               >

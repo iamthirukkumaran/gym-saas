@@ -43,11 +43,11 @@ export function RoiCalculator() {
     }).format(n);
 
   return (
-    <div className="overflow-hidden border border-white/12 bg-white/[0.02]">
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02]">
       <div className="grid lg:grid-cols-[1.1fr_1fr]">
         {/* ── Inputs ─────────────────────────────────────────────────── */}
         <div className="border-b border-white/10 p-7 lg:border-b-0 lg:border-r lg:p-9">
-          <p className="label text-volt-300">Your numbers</p>
+          <p className="eyebrow">Your numbers</p>
           <h3 className="display display-sm mt-4 text-white">
             What are lapsed members costing you?
           </h3>
@@ -89,14 +89,14 @@ export function RoiCalculator() {
 
         {/* ── Result ─────────────────────────────────────────────────── */}
         <div className="relative flex flex-col justify-center p-7 lg:p-9">
-          <div className="pointer-events-none absolute inset-0 bg-volt-300" />
+          <div className="pointer-events-none absolute inset-0 bg-butter-300" />
 
           <div className="relative">
-            <p className="label text-void/60">Recoverable with Astryx</p>
+            <p className="text-[13.5px] font-medium text-void/55">Recoverable with Astryx</p>
 
             <p className="display mt-4 text-6xl text-void">
               {inr(result.monthly)}
-              <span className="label ml-2 align-middle text-void/50">/month</span>
+              <span className="ml-2 align-baseline text-[15px] text-void/50">/month</span>
             </p>
 
             <p className="mt-3 text-[15px] text-void/70">
@@ -116,12 +116,12 @@ export function RoiCalculator() {
               <Row label="Astryx Growth plan" value={`${inr(result.cost)}/mo`} />
             </div>
 
-            <div className="mt-7 flex items-center gap-4 border border-void/20 bg-void p-5">
-              <span className="grid size-11 shrink-0 place-items-center bg-volt-300 text-void">
+            <div className="mt-7 flex items-center gap-4 rounded-xl border border-void/15 bg-void p-5">
+              <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-butter-300 text-void">
                 <IconTrendUp className="size-5" />
               </span>
               <div>
-                <p className="display text-xl text-volt-300">
+                <p className="display text-xl text-butter-300">
                   {result.roi >= 1
                     ? `${result.roi.toFixed(result.roi >= 10 ? 0 : 1)}× return`
                     : "Below break-even"}
@@ -194,7 +194,7 @@ function Slider({
           "[&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white",
         )}
         style={{
-          background: `linear-gradient(90deg, #d4ff3f 0%, #d4ff3f ${pct}%, rgb(255 255 255 / 0.12) ${pct}%)`,
+          background: `linear-gradient(90deg, #f2d953 0%, #f2d953 ${pct}%, rgb(255 255 255 / 0.12) ${pct}%)`,
         }}
       />
 

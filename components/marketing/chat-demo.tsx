@@ -57,7 +57,7 @@ const SCRIPT: Msg[] = [
  * persuasive element on the page: it shows the entire value proposition —
  * a renewal recovered without the owner touching anything — in ten seconds.
  */
-export function ChatDemo() {
+export function ChatDemo({ bare = false }: { bare?: boolean } = {}) {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(0);
   const [typing, setTyping] = useState(false);
@@ -174,12 +174,16 @@ export function ChatDemo() {
         </div>
       </div>
 
-      <p className="mt-5 text-center">
-        <span className="label block text-volt-300">Sent automatically</span>
-        <span className="mt-1.5 block text-[12.5px] text-white/45">
-          7 days before expiry, 10:00 AM IST. The owner did nothing.
-        </span>
-      </p>
+      {bare ? null : (
+        <p className="mt-5 text-center">
+          <span className="block text-[13px] font-medium text-butter-300">
+            Sent automatically
+          </span>
+          <span className="mt-1.5 block text-[12.5px] text-white/45">
+            7 days before expiry, 10:00 AM IST. The owner did nothing.
+          </span>
+        </p>
+      )}
     </div>
   );
 }

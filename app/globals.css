@@ -57,27 +57,24 @@
   --color-info-600: #1b63c4;
   --color-info-700: #144c99;
 
-  /* Volt — the athletic accent. Electric lime on near-black is the visual
-     shorthand for training, and it is the one colour that cannot be mistaken
-     for generic SaaS violet. Used for emphasis and CTAs only. */
-  --color-volt-50: #f7ffe0;
-  --color-volt-100: #edffb8;
-  --color-volt-200: #e0ff85;
-  --color-volt-300: #d4ff3f;
-  --color-volt-400: #c3f000;
-  --color-volt-500: #addb00;
-  --color-volt-600: #8fb800;
-  --color-volt-700: #6d8c00;
-  --color-volt-800: #4f6600;
-  --color-volt-900: #364700;
+  /* Butter — one warm accent, used sparingly. Muted rather than neon:
+     a premium brand earns attention with restraint, and a fluorescent
+     accent would contradict everything the copy claims. */
+  --color-butter-100: #fdf6d4;
+  --color-butter-200: #fbeda8;
+  --color-butter-300: #f2d953;
+  --color-butter-400: #e5c73a;
+  --color-butter-500: #cfae22;
+  --color-butter-600: #a88a15;
 
-  /* Near-black, never pure black — pure #000 crushes shadows on OLED. */
-  --color-void: #0a0a0c;
-  --color-void-soft: #121216;
+  /* Near-black, never pure black — #000 crushes shadows on OLED. */
+  --color-void: #0d0d0f;
+  --color-void-soft: #141417;
+  --color-void-panel: #1a1a1e;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-anton), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --radius-xl: 0.875rem;
@@ -431,98 +428,152 @@ input[type="number"]::-webkit-inner-spin-button {
   }
 }
 
+
 /* ───────────────────────────────────────────────────────────────────────────
-   Athletic display system
-   The marketing site speaks a different visual language from the product:
-   oversized condensed uppercase type, hard edges, electric accent. The app
-   stays calm and legible — a dashboard someone stares at all day should not
-   shout.
+   Editorial display system
+   Large type at *regular* weight, sentence case, tight tracking. The restraint
+   is deliberate: the product's whole argument is that it does the chasing
+   quietly, and a shouting interface would contradict it.
    ─────────────────────────────────────────────────────────────────────────── */
 
 .display {
   font-family: var(--font-display);
-  font-weight: 400; /* Anton ships a single, already-heavy weight */
-  text-transform: uppercase;
-  line-height: 0.88;
-  letter-spacing: -0.015em;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  line-height: 0.95;
 }
 
-/* Fluid display sizes — these have to work from a 320px phone to a 2560px
-   monitor without a dozen breakpoints. */
-.display-xl { font-size: clamp(2.6rem, 8.2vw, 7rem); }
-.display-lg { font-size: clamp(2.6rem, 7.5vw, 6rem); }
-.display-md { font-size: clamp(2rem, 4.6vw, 3.6rem); }
-.display-sm { font-size: clamp(1.5rem, 2.6vw, 2.2rem); }
+.display-xl { font-size: clamp(2.5rem, 6.1vw, 5.5rem); }
+.display-lg { font-size: clamp(2.1rem, 4.4vw, 4rem); }
+.display-md { font-size: clamp(1.6rem, 2.9vw, 2.6rem); }
+.display-sm { font-size: clamp(1.25rem, 1.9vw, 1.65rem); letter-spacing: -0.015em; }
 
-/* Outlined type, for the second line of a two-tone headline. */
-.display-outline {
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.35);
-}
-@media (min-width: 768px) {
-  .display-outline { -webkit-text-stroke-width: 2px; }
-}
+/* Second line of a two-tone headline: the thought continues, quieter. */
+.display-dim { color: rgb(255 255 255 / 0.38); }
 
-.label {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
+/* ── Eyebrow: a hairline accent bar and a quiet label ─────────────────────── */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: rgb(255 255 255 / 0.72);
 }
-
-/* ── Volt marquee band ────────────────────────────────────────────────────── */
-.band-volt {
-  background: var(--color-volt-300);
-  color: var(--color-void);
+.eyebrow::before {
+  content: "";
+  width: 2px;
+  height: 0.95em;
+  background: var(--color-butter-300);
+  border-radius: 1px;
 }
 
-/* ── Diagonal cut between sections ────────────────────────────────────────── */
-.cut-top {
-  clip-path: polygon(0 3.5vw, 100% 0, 100% 100%, 0 100%);
+/* ── Panels ───────────────────────────────────────────────────────────────── */
+/* A barely-there top-left sheen keeps a large dark block from reading flat. */
+.panel {
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.055), transparent 42%),
+    var(--color-void-soft);
+  border-radius: 0.875rem;
 }
 
-/* ── Hover: reveal an accent wipe behind a link ───────────────────────────── */
-.wipe {
+.panel-outline {
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 0.875rem;
+}
+
+/* ── Dot grid background texture ──────────────────────────────────────────── */
+.dot-grid {
+  background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ── Hairline rule with end ticks ─────────────────────────────────────────── */
+.rule-ticked {
   position: relative;
-  overflow: hidden;
-  isolation: isolate;
+  height: 1px;
+  background: rgb(255 255 255 / 0.1);
 }
-.wipe::before {
+.rule-ticked::before,
+.rule-ticked::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background: var(--color-volt-300);
-  transform: translateY(101%);
-  transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: -1;
+  top: -3px;
+  width: 1px;
+  height: 7px;
+  background: rgb(255 255 255 / 0.22);
 }
-.wipe:hover::before { transform: translateY(0); }
+.rule-ticked::before { left: 0; }
+.rule-ticked::after { right: 0; }
 
-/* ── Big number watermark behind a section ────────────────────────────────── */
-.watermark {
-  font-family: var(--font-display);
-  font-size: clamp(9rem, 26vw, 22rem);
-  line-height: 0.75;
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(255 255 255 / 0.055);
-  pointer-events: none;
-  user-select: none;
+/* ── Paragraph that dissolves at the end ──────────────────────────────────── */
+/* Used under hero and intro copy so a block of text stops without a hard edge. */
+.fade-out {
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
 }
 
-/* ── Ken-burns drift for photographic panels ──────────────────────────────── */
-@keyframes slow-zoom {
-  from { transform: scale(1); }
-  to { transform: scale(1.09); }
+/* ── Accent button: label, then a light square holding the arrow ──────────── */
+.btn-accent {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--color-butter-300);
+  color: var(--color-void);
+  transition: background 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.slow-zoom { animation: slow-zoom 18s ease-in-out infinite alternate; }
-
-/* ── Scroll-driven horizontal rail ────────────────────────────────────────── */
-.rail {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+.btn-accent:hover {
+  background: var(--color-butter-200);
+  transform: translateY(-2px);
 }
-.rail::-webkit-scrollbar { display: none; }
+.btn-accent > .btn-label {
+  padding: 1rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.btn-accent > .btn-icon {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  margin: 0.4rem 0.4rem 0.4rem 0;
+  border-radius: 0.375rem;
+  background: #fff;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-accent:hover > .btn-icon { transform: translate(2px, -2px); }
 
-@media (prefers-reduced-motion: reduce) {
-  .slow-zoom { animation: none !important; }
+/* Ghost variant for secondary actions. */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: rgb(255 255 255 / 0.9);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+.btn-ghost:hover {
+  border-color: rgb(255 255 255 / 0.4);
+  background: rgb(255 255 255 / 0.04);
+}
+
+/* ── Nav pill for the active link ─────────────────────────────────────────── */
+.nav-pill {
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 0.5rem;
+  background: rgb(255 255 255 / 0.04);
+}
+
+/* ── Soft vignette behind the hero subject ────────────────────────────────── */
+.spotlight {
+  background: radial-gradient(
+    ellipse 60% 55% at 50% 45%,
+    rgb(255 255 255 / 0.07),
+    transparent 70%
+  );
 }

@@ -72,9 +72,9 @@ export function FeatureTabs() {
             }}
             aria-pressed={i === active}
             className={cn(
-              "label relative flex shrink-0 items-center gap-2 border px-5 py-3.5 transition-all",
+              "relative flex shrink-0 items-center gap-2 rounded-lg border px-4 py-2.5 text-[13.5px] font-medium transition-all",
               i === active
-                ? "border-volt-300 bg-volt-300 text-void"
+                ? "border-butter-300 bg-butter-300 text-void"
                 : "border-white/15 text-white/45 hover:border-white/35 hover:text-white/80",
             )}
           >
@@ -82,7 +82,7 @@ export function FeatureTabs() {
             {t.label}
             {/* Progress bar on the active tab, only while auto-advancing */}
             {i === active && !paused && inView ? (
-              <span className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden bg-void/20">
+              <span className="absolute inset-x-2 bottom-1 h-0.5 overflow-hidden rounded-full bg-void/20">
                 <span
                   key={active}
                   className="block h-full bg-void"
@@ -102,8 +102,8 @@ export function FeatureTabs() {
           <ul className="mt-7 space-y-3">
             {tab.points.map((p) => (
               <li key={p} className="flex items-start gap-3 text-[14.5px] text-white/75">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center bg-volt-300/15">
-                  <IconCheck className="size-3 text-volt-300" strokeWidth={3} />
+                <span className="mt-0.5 grid size-5 shrink-0 place-items-center bg-butter-300/15">
+                  <IconCheck className="size-3 text-butter-300" strokeWidth={3} />
                 </span>
                 {p}
               </li>
@@ -123,7 +123,7 @@ export function FeatureTabs() {
 
 function Panel({ children, title }: { children: React.ReactNode; title: string }) {
   return (
-    <div className="overflow-hidden border border-white/12 bg-void-soft shadow-2xl shadow-black/50">
+    <div className="overflow-hidden rounded-xl border border-white/10 bg-void-soft shadow-2xl shadow-black/40">
       <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
         <span className="size-2.5 rounded-full bg-bad-500/60" />
         <span className="size-2.5 rounded-full bg-warn-500/60" />

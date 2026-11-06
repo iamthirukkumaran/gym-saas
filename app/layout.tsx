@@ -1,21 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Inter } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 
 import "./globals.css";
 
 /**
- * Anton carries the marketing site's display type — an ultra-bold condensed
- * face is the whole visual language of athletic design, and no system font
- * gets close. Inter handles body copy and the entire product UI, where
- * legibility beats personality.
+ * Plus Jakarta Sans carries the marketing site — a geometric grotesk in the
+ * Aeonik/Söhne family of shapes. The display sizes are set at regular weight
+ * rather than black: restraint is the point, and an ultra-bold face would
+ * undercut a brand built on not shouting.
+ *
+ * Inter stays on the product UI, where legibility beats personality.
  *
  * Both are self-hosted by next/font at build time, so there's no runtime
  * request to Google and no layout shift.
  */
-const display = Anton({
+const display = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: "400",
-  variable: "--font-anton",
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-jakarta",
   display: "swap",
 });
 
