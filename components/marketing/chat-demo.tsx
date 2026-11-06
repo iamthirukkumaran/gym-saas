@@ -124,7 +124,7 @@ export function ChatDemo() {
 
   return (
     <div ref={ref} className="mx-auto w-full max-w-sm">
-      <div className="rounded-[2.4rem] border border-white/15 bg-ink-900 p-2.5 shadow-2xl shadow-black/60">
+      <div className="rounded-[2.4rem] border border-white/15 bg-void-soft p-2.5 shadow-2xl shadow-black/70">
         <div className="overflow-hidden rounded-[2rem] bg-white">
           {/* chat header */}
           <div className="flex items-center gap-3 bg-[#075e54] px-4 py-3">
@@ -174,10 +174,11 @@ export function ChatDemo() {
         </div>
       </div>
 
-      <p className="mt-4 text-center text-[12.5px] text-white/50">
-        Sent automatically, 7 days before expiry, at 10:00 AM IST.
-        <br />
-        <span className="text-white/35">The owner did nothing.</span>
+      <p className="mt-5 text-center">
+        <span className="label block text-volt-300">Sent automatically</span>
+        <span className="mt-1.5 block text-[12.5px] text-white/45">
+          7 days before expiry, 10:00 AM IST. The owner did nothing.
+        </span>
       </p>
     </div>
   );

@@ -72,20 +72,20 @@ export function FeatureTabs() {
             }}
             aria-pressed={i === active}
             className={cn(
-              "relative flex shrink-0 items-center gap-2 rounded-full border px-4 py-2.5 text-[13.5px] font-medium transition-all",
+              "label relative flex shrink-0 items-center gap-2 border px-5 py-3.5 transition-all",
               i === active
-                ? "border-white/25 bg-white/10 text-white"
-                : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/80",
+                ? "border-volt-300 bg-volt-300 text-void"
+                : "border-white/15 text-white/45 hover:border-white/35 hover:text-white/80",
             )}
           >
-            <span className={i === active ? "text-brand-300" : "text-white/40"}>{t.icon}</span>
+            <span className={i === active ? "text-void" : "text-white/35"}>{t.icon}</span>
             {t.label}
             {/* Progress bar on the active tab, only while auto-advancing */}
             {i === active && !paused && inView ? (
-              <span className="absolute inset-x-3 bottom-1 h-px overflow-hidden rounded-full bg-white/15">
+              <span className="absolute inset-x-0 bottom-0 h-0.5 overflow-hidden bg-void/20">
                 <span
                   key={active}
-                  className="block h-full bg-brand-400"
+                  className="block h-full bg-void"
                   style={{ animation: "marquee-scroll 5.2s linear", width: "200%" }}
                 />
               </span>
@@ -97,15 +97,13 @@ export function FeatureTabs() {
       {/* Panel */}
       <div className="mt-10 grid items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <div key={`copy-${active}`} className="bubble-in">
-          <h3 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            {tab.headline}
-          </h3>
-          <p className="mt-4 text-[15.5px] leading-relaxed text-white/60">{tab.body}</p>
+          <h3 className="display display-md text-white">{tab.headline}</h3>
+          <p className="mt-5 text-[16px] leading-relaxed text-white/55">{tab.body}</p>
           <ul className="mt-7 space-y-3">
             {tab.points.map((p) => (
               <li key={p} className="flex items-start gap-3 text-[14.5px] text-white/75">
-                <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-good-500/15">
-                  <IconCheck className="size-3 text-good-400" strokeWidth={3} />
+                <span className="mt-0.5 grid size-5 shrink-0 place-items-center bg-volt-300/15">
+                  <IconCheck className="size-3 text-volt-300" strokeWidth={3} />
                 </span>
                 {p}
               </li>
@@ -125,7 +123,7 @@ export function FeatureTabs() {
 
 function Panel({ children, title }: { children: React.ReactNode; title: string }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/80 shadow-2xl shadow-black/40 backdrop-blur">
+    <div className="overflow-hidden border border-white/12 bg-void-soft shadow-2xl shadow-black/50">
       <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
         <span className="size-2.5 rounded-full bg-bad-500/60" />
         <span className="size-2.5 rounded-full bg-warn-500/60" />

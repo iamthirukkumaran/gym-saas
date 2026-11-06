@@ -106,7 +106,7 @@ export function Faq() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <div className="divide-y divide-white/10 overflow-hidden rounded-3xl border border-white/10 bg-white/[0.02]">
+    <div className="divide-y divide-white/10 border-y border-white/10">
       {FAQS.map((item, i) => {
         const isOpen = open === i;
         return (
@@ -115,25 +115,31 @@ export function Faq() {
               type="button"
               onClick={() => setOpen(isOpen ? null : i)}
               aria-expanded={isOpen}
-              className="flex w-full items-center justify-between gap-6 px-6 py-5 text-left transition-colors hover:bg-white/[0.03] sm:px-8"
+              className="group flex w-full items-center justify-between gap-6 py-7 text-left transition-colors"
             >
               <span
                 className={cn(
-                  "text-[15px] font-medium transition-colors sm:text-base",
-                  isOpen ? "text-white" : "text-white/80",
+                  "text-[17px] font-medium transition-colors sm:text-[19px]",
+                  isOpen ? "text-volt-300" : "text-white/85 group-hover:text-white",
                 )}
               >
                 {item.q}
               </span>
               <span
                 className={cn(
-                  "grid size-7 shrink-0 place-items-center rounded-full border transition-all duration-300",
+                  "grid size-9 shrink-0 place-items-center border transition-all duration-300",
                   isOpen
-                    ? "rotate-45 border-brand-400/40 bg-brand-500/20 text-brand-300"
-                    : "border-white/15 text-white/50",
+                    ? "border-volt-300 bg-volt-300 text-void"
+                    : "border-white/20 text-white/50 group-hover:border-white/50",
                 )}
               >
-                <IconPlus className="size-3.5" strokeWidth={2.5} />
+                <IconPlus
+                  className={cn(
+                    "size-3.5 transition-transform duration-300",
+                    isOpen && "rotate-45",
+                  )}
+                  strokeWidth={2.5}
+                />
               </span>
             </button>
 
@@ -142,7 +148,7 @@ export function Faq() {
               style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
             >
               <div className="overflow-hidden">
-                <p className="px-6 pb-6 text-[14.5px] leading-relaxed text-white/55 sm:px-8">
+                <p className="max-w-3xl pb-8 pr-12 text-[15px] leading-relaxed text-white/50">
                   {item.a}
                 </p>
               </div>

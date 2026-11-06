@@ -45,11 +45,11 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
         <div
           role="group"
           aria-label="Billing period"
-          className="relative inline-flex items-center rounded-full border border-white/12 bg-white/[0.04] p-1 backdrop-blur"
+          className="relative inline-flex items-center border border-white/15 bg-white/[0.03] p-1"
         >
           {/* Sliding pill */}
           <span
-            className="absolute inset-y-1 w-[calc(50%-0.25rem)] rounded-full bg-white transition-transform duration-300 ease-out"
+            className="absolute inset-y-1 w-[calc(50%-0.25rem)] bg-volt-300 transition-transform duration-300 ease-out"
             style={{ transform: yearly ? "translateX(100%)" : "translateX(0)" }}
             aria-hidden
           />
@@ -62,8 +62,8 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
                 onClick={() => setYearly(i === 1)}
                 aria-pressed={active}
                 className={cn(
-                  "relative z-10 w-32 rounded-full px-4 py-2 text-[13.5px] font-semibold transition-colors",
-                  active ? "text-ink-900" : "text-white/60 hover:text-white/85",
+                  "label relative z-10 w-32 px-4 py-3 transition-colors",
+                  active ? "text-void" : "text-white/50 hover:text-white/85",
                 )}
               >
                 {label}
@@ -74,7 +74,7 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
       </div>
 
       {monthsFree > 0 ? (
-        <p className="mt-3 text-center text-[13px] text-good-400">
+        <p className="label mt-4 text-center text-volt-300">
           Yearly billing is {monthsFree} {monthsFree === 1 ? "month" : "months"} free
         </p>
       ) : null}
@@ -88,20 +88,25 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
             <div
               key={p.key}
               className={cn(
-                "lift relative rounded-3xl p-7",
+                "lift relative p-8",
                 featured
-                  ? "glow-border bg-ink-900 shadow-2xl shadow-brand-900/40"
-                  : "border border-white/10 bg-white/[0.03] hover:border-white/20",
+                  ? "bg-volt-300 text-void shadow-[0_24px_60px_-12px_rgb(212_255_63_/_0.25)]"
+                  : "border border-white/12 bg-white/[0.02] hover:border-white/25",
               )}
             >
               {featured ? (
-                <span className="absolute -top-3 left-7 rounded-full bg-gradient-to-r from-brand-500 to-brand-400 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-lg">
+                <span className="label absolute -top-3.5 left-8 bg-void px-3 py-2 text-volt-300">
                   Most popular
                 </span>
               ) : null}
 
-              <h3 className="text-lg font-semibold text-white">{p.name}</h3>
-              <p className="mt-1 min-h-10 text-[13px] leading-snug text-white/50">
+              <h3 className={cn("display display-sm", featured ? "text-void" : "text-white")}>{p.name}</h3>
+              <p
+                className={cn(
+                  "mt-2 min-h-10 text-[13.5px] leading-snug",
+                  featured ? "text-void/65" : "text-white/45",
+                )}
+              >
                 {p.tagline}
               </p>
 
@@ -109,14 +114,19 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
                 {/* key forces a re-mount so the number animates on toggle */}
                 <span
                   key={`${p.key}-${yearly}`}
-                  className="nums bubble-in text-4xl font-semibold tracking-tight text-white"
+                  className={cn(
+                    "display bubble-in text-5xl",
+                    featured ? "text-void" : "text-white",
+                  )}
                 >
                   {inr(price)}
                 </span>
-                <span className="text-sm text-white/45">/{yearly ? "year" : "month"}</span>
+                <span className={cn("label", featured ? "text-void/55" : "text-white/40")}>
+                  /{yearly ? "yr" : "mo"}
+                </span>
               </div>
 
-              <p className="nums mt-1 h-5 text-[12px] text-white/40">
+              <p className={cn("nums mt-2 h-5 text-[12px]", featured ? "text-void/55" : "text-white/35")}>
                 {yearly
                   ? `${inr(Math.round(p.priceYearly / 12))} per month, billed yearly`
                   : `${inr(p.priceYearly)} if you pay yearly`}
@@ -125,19 +135,36 @@ export function PricingTable({ plans }: { plans: PlanCard[] }) {
               <Link
                 href="/login"
                 className={cn(
-                  "mt-6 flex h-12 items-center justify-center rounded-xl font-semibold transition-all",
+                  "label mt-7 flex h-14 items-center justify-center transition-all",
                   featured
-                    ? "shine bg-white text-ink-900 hover:scale-[1.02]"
-                    : "border border-white/15 text-white hover:bg-white/10",
+                    ? "bg-void text-volt-300 hover:bg-void-soft"
+                    : "border border-white/20 text-white hover:border-volt-300 hover:bg-volt-300 hover:text-void",
                 )}
               >
                 Start 14-day trial
               </Link>
 
-              <ul className="mt-7 space-y-3 border-t border-white/10 pt-6">
+              <ul
+                className={cn(
+                  "mt-8 space-y-3.5 border-t pt-7",
+                  featured ? "border-void/15" : "border-white/10",
+                )}
+              >
                 {p.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2.5 text-[13.5px] text-white/70">
-                    <IconCheck className="mt-0.5 size-3.5 shrink-0 text-good-400" strokeWidth={2.5} />
+                  <li
+                    key={f}
+                    className={cn(
+                      "flex items-start gap-3 text-[13.5px]",
+                      featured ? "text-void/80" : "text-white/65",
+                    )}
+                  >
+                    <IconCheck
+                      className={cn(
+                        "mt-0.5 size-3.5 shrink-0",
+                        featured ? "text-void" : "text-volt-300",
+                      )}
+                      strokeWidth={3}
+                    />
                     {f}
                   </li>
                 ))}

@@ -43,17 +43,15 @@ export function RoiCalculator() {
     }).format(n);
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl">
+    <div className="overflow-hidden border border-white/12 bg-white/[0.02]">
       <div className="grid lg:grid-cols-[1.1fr_1fr]">
         {/* ── Inputs ─────────────────────────────────────────────────── */}
         <div className="border-b border-white/10 p-7 lg:border-b-0 lg:border-r lg:p-9">
-          <p className="text-[12px] font-semibold uppercase tracking-wider text-brand-300">
-            Your numbers
-          </p>
-          <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+          <p className="label text-volt-300">Your numbers</p>
+          <h3 className="display display-sm mt-4 text-white">
             What are lapsed members costing you?
           </h3>
-          <p className="mt-2 text-[14px] leading-relaxed text-white/55">
+          <p className="mt-3 text-[14px] leading-relaxed text-white/50">
             Drag the sliders. No sign-up, nothing sent anywhere.
           </p>
 
@@ -91,23 +89,21 @@ export function RoiCalculator() {
 
         {/* ── Result ─────────────────────────────────────────────────── */}
         <div className="relative flex flex-col justify-center p-7 lg:p-9">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-500/15 via-transparent to-good-500/10" />
+          <div className="pointer-events-none absolute inset-0 bg-volt-300" />
 
           <div className="relative">
-            <p className="text-[12px] font-semibold uppercase tracking-wider text-good-400">
-              Recoverable with Astryx
-            </p>
+            <p className="label text-void/60">Recoverable with Astryx</p>
 
-            <p className="mt-3 text-5xl font-semibold tracking-tight text-white">
+            <p className="display mt-4 text-6xl text-void">
               {inr(result.monthly)}
-              <span className="ml-1 text-lg font-normal text-white/45">/month</span>
+              <span className="label ml-2 align-middle text-void/50">/month</span>
             </p>
 
-            <p className="mt-2 text-[15px] text-white/65">
-              about <strong className="font-semibold text-white">{inr(result.yearly)}</strong> a year
+            <p className="mt-3 text-[15px] text-void/70">
+              about <strong className="font-semibold text-void">{inr(result.yearly)}</strong> a year
             </p>
 
-            <div className="mt-7 space-y-3 border-t border-white/10 pt-6">
+            <div className="mt-8 space-y-3 border-t border-void/15 pt-7">
               <Row
                 label="Members lapsing each month"
                 value={String(result.lapsingPerMonth)}
@@ -120,17 +116,17 @@ export function RoiCalculator() {
               <Row label="Astryx Growth plan" value={`${inr(result.cost)}/mo`} />
             </div>
 
-            <div className="mt-6 flex items-center gap-3 rounded-2xl border border-good-500/25 bg-good-500/10 p-4">
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-good-500/20 text-good-400">
+            <div className="mt-7 flex items-center gap-4 border border-void/20 bg-void p-5">
+              <span className="grid size-11 shrink-0 place-items-center bg-volt-300 text-void">
                 <IconTrendUp className="size-5" />
               </span>
               <div>
-                <p className="text-[15px] font-semibold text-white">
+                <p className="display text-xl text-volt-300">
                   {result.roi >= 1
                     ? `${result.roi.toFixed(result.roi >= 10 ? 0 : 1)}× return`
                     : "Below break-even"}
                 </p>
-                <p className="text-[12.5px] text-white/60">
+                <p className="mt-0.5 text-[12.5px] text-white/55">
                   {result.roi >= 1
                     ? `Pays for itself with ${Math.max(1, Math.ceil(result.cost / fee))} recovered ${Math.ceil(result.cost / fee) === 1 ? "member" : "members"}.`
                     : "At this size, start on the Starter plan instead."}
@@ -138,7 +134,7 @@ export function RoiCalculator() {
               </div>
             </div>
 
-            <p className="mt-5 text-[11.5px] leading-relaxed text-white/35">
+            <p className="mt-6 text-[11.5px] leading-relaxed text-void/55">
               Assumes a 25% win-back rate on members who would otherwise lapse
               — deliberately conservative. Reminders sent before expiry
               typically do better than ones sent after.
@@ -192,13 +188,13 @@ function Slider({
           // styleable "filled" pseudo-element across browsers.
           "[&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none",
           "[&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white",
-          "[&::-webkit-slider-thumb]:shadow-[0_0_0_4px_rgb(109_74_255_/_0.35)]",
+          "[&::-webkit-slider-thumb]:shadow-[0_0_0_4px_rgb(212_255_63_/_0.3)]",
           "[&::-webkit-slider-thumb]:transition-transform hover:[&::-webkit-slider-thumb]:scale-110",
           "[&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:rounded-full",
           "[&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-white",
         )}
         style={{
-          background: `linear-gradient(90deg, #6d4aff 0%, #8f75ff ${pct}%, rgb(255 255 255 / 0.15) ${pct}%)`,
+          background: `linear-gradient(90deg, #d4ff3f 0%, #d4ff3f ${pct}%, rgb(255 255 255 / 0.12) ${pct}%)`,
         }}
       />
 
@@ -218,11 +214,11 @@ function Row({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <span className="text-[13px] text-white/55">{label}</span>
+      <span className="text-[13px] text-void/60">{label}</span>
       <span
         className={cn(
           "nums text-[15px] font-semibold",
-          accent ? "text-good-400" : "text-white/90",
+          accent ? "text-void" : "text-void/80",
         )}
       >
         {value}

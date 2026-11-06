@@ -150,8 +150,8 @@ export function Marquee({
   return (
     <div className={cn("marquee relative overflow-hidden", className)}>
       {/* Edge fades so items dissolve rather than clipping at the boundary */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-ink-950 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-ink-950 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-void to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-void to-transparent" />
       <div className="marquee-track" aria-hidden>
         {/* Duplicated so the -50% translate loops seamlessly */}
         {[...items, ...items].map((item, i) => (
@@ -188,7 +188,7 @@ export function ScrollProgress() {
   return (
     <div className="fixed inset-x-0 top-0 z-[60] h-0.5 bg-transparent">
       <div
-        className="scroll-progress h-full bg-gradient-to-r from-brand-400 to-good-500"
+        className="scroll-progress h-full bg-volt-300"
         style={{ transform: `scaleX(${pct})` }}
       />
     </div>
