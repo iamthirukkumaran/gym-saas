@@ -5,6 +5,7 @@
 Astryx keeps every member, plan and expiry date in one place — then chases the renewal on WhatsApp automatically, before the membership lapses.
 
 ```
+Marketing site       →  /
 Gym owner dashboard  →  /login        (demo: owner@ironcore.in / gym1234)
 Platform admin       →  /admin/login  (demo: admin@astryx.app / astryx123)
 Public renewal page  →  /r/<memberId>
@@ -75,6 +76,20 @@ npm run engine                # one idempotent pass over every tenant
 | **Message log** | Every message sent, queued, skipped or failed — with retry |
 | **Reports** | Collections, renewal rate, plan mix, acquisition sources, month-by-month movement, LTV, trainer load |
 | **Settings** | Gym profile, UPI ID, membership plans, staff roles, WhatsApp provider, subscription & usage |
+
+### Marketing site
+
+A self-playing WhatsApp conversation showing a renewal being recovered · an
+interactive ROI calculator that computes the visitor's own number from three
+sliders · a tabbed feature showcase built from real screen mocks · a
+comparison against a register and a spreadsheet (not against named
+competitors — the buyer isn't switching software, they have none) · live
+pricing read from the database with a monthly/yearly toggle · FAQ.
+
+Motion is IntersectionObserver plus CSS — no animation library, because the
+buyer is often on a patchy mobile connection and shipping 40KB of motion
+runtime would undercut the thing the page is selling. Everything respects
+`prefers-reduced-motion`.
 
 ### Platform (your) side
 

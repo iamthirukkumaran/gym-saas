@@ -207,3 +207,207 @@ input[type="number"]::-webkit-inner-spin-button {
   .no-print { display: none !important; }
   body { background: #fff; }
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Marketing site motion
+   Scroll-reveal is driven by an IntersectionObserver that flips
+   `data-reveal="in"`; the animation itself is pure CSS so nothing janks on
+   the main thread. Every effect below is disabled by the
+   prefers-reduced-motion block further up this file.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal="in"] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal-scale] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+[data-reveal-scale="in"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Aurora / mesh background ─────────────────────────────────────────────── */
+@keyframes aurora-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(3%, -4%, 0) scale(1.08); }
+  66% { transform: translate3d(-3%, 3%, 0) scale(0.95); }
+}
+
+.aurora {
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.55;
+}
+.aurora span {
+  position: absolute;
+  display: block;
+  border-radius: 9999px;
+  animation: aurora-drift 18s ease-in-out infinite;
+}
+.aurora span:nth-child(1) {
+  width: 46%; height: 46%; left: 4%; top: 2%;
+  background: radial-gradient(circle, rgb(109 74 255 / 0.85), transparent 70%);
+}
+.aurora span:nth-child(2) {
+  width: 40%; height: 40%; right: 6%; top: -4%;
+  background: radial-gradient(circle, rgb(0 196 140 / 0.5), transparent 70%);
+  animation-delay: -6s;
+}
+.aurora span:nth-child(3) {
+  width: 36%; height: 36%; left: 32%; bottom: -6%;
+  background: radial-gradient(circle, rgb(47 128 237 / 0.5), transparent 70%);
+  animation-delay: -12s;
+}
+
+/* Fine grain stops large gradients from banding on cheap panels. */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Marquee ──────────────────────────────────────────────────────────────── */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 42s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ── Chat demo ────────────────────────────────────────────────────────────── */
+@keyframes bubble-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.bubble-in {
+  animation: bubble-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.typing-dot { animation: typing-dot 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* ── Shine sweep on primary CTAs ──────────────────────────────────────────── */
+@keyframes shine-sweep {
+  from { transform: translateX(-120%) skewX(-18deg); }
+  to { transform: translateX(260%) skewX(-18deg); }
+}
+.shine { position: relative; overflow: hidden; }
+.shine::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; width: 42%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.35), transparent);
+  animation: shine-sweep 3.6s ease-in-out infinite;
+  animation-delay: 1.2s;
+}
+
+/* ── Gradient text that slowly shifts ─────────────────────────────────────── */
+@keyframes hue-slide {
+  to { background-position: 200% center; }
+}
+.gradient-text {
+  background: linear-gradient(90deg, #ae9bff, #00c48c, #8f75ff, #ae9bff);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: hue-slide 7s linear infinite;
+}
+
+/* ── Card lift ────────────────────────────────────────────────────────────── */
+.lift {
+  transition:
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease;
+}
+.lift:hover { transform: translateY(-4px); }
+
+/* ── Conic border glow for the featured pricing card ──────────────────────────
+   The angle is animated through a registered custom property rather than by
+   rotating the element. Rotating a conic-gradient box makes its corners sweep
+   outside the rounded rectangle, which leaks coloured blobs past the card
+   edge; animating the angle keeps the painted box exactly where it is.
+   Browsers without @property simply render a static gradient ring.          */
+@property --glow-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes glow-spin {
+  to { --glow-angle: 360deg; }
+}
+
+/* No `isolation` here on purpose: creating a stacking context would paint
+   the ::before layer *above* this element's own background instead of behind
+   it, filling the whole card instead of leaving a 1.5px ring. */
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--glow-angle),
+    #6d4aff,
+    #00c48c,
+    #2f80ed,
+    #6d4aff
+  );
+  animation: glow-spin 6s linear infinite;
+  z-index: -1;
+}
+
+/* ── Scroll progress bar ──────────────────────────────────────────────────── */
+.scroll-progress {
+  transform-origin: 0 50%;
+  transition: transform 0.1s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora span,
+  .marquee-track,
+  .shine::after,
+  .gradient-text,
+  .glow-border::before,
+  .typing-dot {
+    animation: none !important;
+  }
+  [data-reveal],
+  [data-reveal-scale] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
